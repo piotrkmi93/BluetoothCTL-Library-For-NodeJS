@@ -12,13 +12,16 @@ let running = false,
     beginning = false,
     ending = false,
     commands = {
-        begin:              require("./functions/begin")    (term),
-        end:                require("./functions/end")      (term),
-        scanon:             require("./functions/scanon")   (term),
-        scanoff:            require("./functions/scanoff")  (term),
-        devices:            require("./functions/devices")  (term),
-        info:               require("./functions/info")     (term),
-        devicesWithInfo:    devicesWithInfo
+        begin:                  require("./functions/begin")            (term),
+        end:                    require("./functions/end")              (term),
+        scanon:                 require("./functions/scanon")           (term),
+        scanoff:                require("./functions/scanoff")          (term),
+        devices:                require("./functions/devices")          (term),
+        info:                   require("./functions/info")             (term),
+        pair:                   require("./functions/pair")             (term),
+        remove:                 require("./functions/remove")           (term),
+        paireddevices:          require("./functions/paireddevices")    (term),
+        devicesWithInfo:        devicesWithInfo
     };
 
 
@@ -124,7 +127,11 @@ function devicesWithInfo( attrs, resolve, reject, index = 0, array = [], first =
         
         if( first ){
         
-            devices(
+            let fun;
+            if( !attrs.only_paired ) fun = devices;
+            else fun = commands.paireddevices;
+            
+            fun(
                 {},
                 data => {
                     array = data.devices
@@ -175,7 +182,5 @@ function devicesWithInfo( attrs, resolve, reject, index = 0, array = [], first =
         },
         err => reject(err)
     );
-    
-    
-    
+  
 }

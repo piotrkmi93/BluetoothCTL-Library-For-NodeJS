@@ -9,35 +9,51 @@ let self = {
     attrs           : undefined,
 
     attempt         : 0,
-    maxAttempt      : 100
+    maxAttempt      : 100,
+    
+    devices         : []
 };
 
 function takeOver( data ) {
     
+    self.devices = [];
+    
     if( typeof data === "string" ){
+        
+        let lines = data.split("\r\n");
+        
+        if(lines.length) {
+            
+            if(!self.resolveFuncRun){
+            
+                for(let line of lines){   
+                    
+                    let idx = line.indexOf("Device ");
+                    if( idx !== -1 ){
+                        let mac = line.slice( 7, 24 );
+                        let name = line.slice( 25 );
+                        
+                        let device = self.devices.find(dev => dev.mac === mac);
+                        
+                        if(!device) self.devices.push({
+                            mac: mac,
+                            name: name
+                        });
+                    }
+                }
 
-        if( ++self.attempt < self.maxAttempt ){
-            
-            let exists = !!~data.indexOf( "Device has been removed" );     
-            let fail = !!~data.indexOf( "Device " + self.attrs.mac + " not available" );
-            
-            if( exists && !self.resolveFuncRun ) {
-                self.resolveFunc( { success: true } );
+                self.resolveFunc({ success: true, devices: self.devices });
                 self.resolveFuncRun = true;
                 self.alreadyRun = false;
+                
             }
-            else if( fail && !self.rejectFuncRun ) {
-                self.rejectFunc( { success: false, reason: "Device " + self.attrs.mac + " not available" } );
-                self.rejectFuncRun = true;
-                self.alreadyRun = false;
-            }
-
+            
         } else {
-
-            self.rejectFunc( { success: false, reason: "Max attempt has been achieved" } );
+            
+            self.rejectFunc( { success: false, reason: "No data returned" } );
             self.rejectFuncRun = true;
             self.alreadyRun = false;
-
+            
         }
 
     }
@@ -55,9 +71,7 @@ module.exports = ( term ) => {
         } else {
 
             if( typeof resolve  !== "undefined" &&
-                typeof reject   !== "undefined" &&
-                typeof attrs     !== "undefined" &&
-                typeof attrs.mac !== "undefined") {
+                typeof reject   !== "undefined") {
 
                 self.resolveFunc = resolve;
                 self.rejectFunc = reject;
@@ -71,7 +85,7 @@ module.exports = ( term ) => {
 
                 term.on("data", data => takeOver( data ));
 
-                term.write("remove " + attrs.mac + "\r");
+                term.write("paired-devices\r");
 
             } else {
 

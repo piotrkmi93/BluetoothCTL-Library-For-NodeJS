@@ -10,58 +10,39 @@ bluetoothctl.exec(
         
         console.log( 11, bluetoothctl.isRunning() );
         
-        
         bluetoothctl.exec(
-            "devicesWithInfo", 
-            {seconds: 5}, 
-            data => console.log(data),
-            err  => console.log(err)
-        );
-        
-        /*bluetoothctl.exec(
-            "scanon",
-            {},
-            data => console.log(data),
-            err  => console.log(err )
-        );
-        
-        setTimeout(() => {
-            
-            bluetoothctl.exec(
-                "devices",
-                {},
-                data => {
-                    console.log(data.devices);
+            "devicesWithInfo",
+            {seconds: 5},
+            data => {
+                console.log("paired-devices", data.devices);
                 
-                    if(data.devices.length){
+                for(let device of data.devices){
+                    
+                    if("00:80:25:34:D8:10" == device.mac){
                         
                         bluetoothctl.exec(
-                            "info",
-                            {mac: data.devices[0].mac},
-                            data => console.log(data),
-                            err  => console.log(err )
+                            "pair",
+                            {mac: device.mac},
+                            data => {
+                                console.log(data);
+
+                                bluetoothctl.exec(
+                                    "devicesWithInfo",
+                                    {seconds: 5, only_paired: true},
+                                    data => console.log("paired-devices", data.devices),
+                                    err  => console.log(err)
+                                );    
+                            },
+                            err  => console.log(err)
                         );
                         
                     }
                     
-                },
-                err     => console.log(err)
-            );
-            
-        }, 5000);*/
+                }
+            },
+            err  => console.log(err)
+        );
         
-        
-        
-//        bluetoothctl.exec(
-//            "end",
-//            undefined,
-//            data => {
-//                console.log( "WYLACZONO", data );
-//                
-//                console.log( 19, bluetoothctl.isRunning() );
-//            },
-//            data => console.log( "NIE WYLACZONO", data ),
-//        );
     },
     data => console.log( "NIE URUCHOMIONO", data ),
 );
