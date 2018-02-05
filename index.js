@@ -10,6 +10,8 @@ bluetoothctl.exec(
         
         console.log( 11, bluetoothctl.isRunning() );
         
+        
+        // TEST 1
         /*bluetoothctl.exec(
             "info",
             //{mac: "00:80:25:34:D8:10"},
@@ -19,7 +21,19 @@ bluetoothctl.exec(
         );*/
         
         
-        bluetoothctl.exec(
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        // TEST 2
+        /*bluetoothctl.exec(
             "scanon",
             {},
             data => {
@@ -32,14 +46,26 @@ bluetoothctl.exec(
                             {},
                             data => {
                                 
+                                console.log("devices", data.devices);
+                                
                                 if(data.devices.length){
                                     
-                                    bluetoothctl.exec(
-                                        "info",
-                                        {mac: data.devices[0].mac},
-                                        data => console.log("SUKCES", data),
-                                        err => console.log("BLAD", err)
-                                    );
+                                    for(let device of data.devices){
+                                        
+                                        if(device.mac === "00:80:25:34:D8:10"){
+                                            
+                                            bluetoothctl.exec(
+                                                "info",
+                                                {mac: device.mac},
+                                                data => console.log("SUKCES", data),
+                                                err => console.log("BLAD", err)
+                                            );
+                                            
+                                        }
+                                        
+                                    }
+                                    
+                                    
                                     
                                 }
                                 
@@ -53,7 +79,7 @@ bluetoothctl.exec(
                 
             },
             err => console.log("BLAD", err)
-        )
+        );*/
         
         
         
@@ -87,9 +113,8 @@ bluetoothctl.exec(
         
         
         
-        
-/*        bluetoothctl.exec(
-//            "devices",
+        // TEST 3
+        bluetoothctl.exec(
             "devicesWithInfo",
             {seconds: 5},
             data => {
@@ -97,30 +122,31 @@ bluetoothctl.exec(
                 
                 for(let device of data.devices){
                     
-//                    if("00:80:25:34:D8:10" == device.mac){
-//                        
-//                        bluetoothctl.exec(
-//                            "pair",
-//                            {mac: device.mac},
-//                            data => {
-//                                console.log(data);
-//
-//                                bluetoothctl.exec(
-//                                    "devicesWithInfo",
-//                                    {seconds: 5, only_paired: true},
-//                                    data => console.log("paired-devices", data.devices),
-//                                    err  => console.log(err)
-//                                );    
-//                            },
-//                            err  => console.log(err)
-//                        );
-//                        
-//                    }
+                    // TEST 4
+                    /*if("00:80:25:34:D8:10" == device.mac){
+                        
+                        bluetoothctl.exec(
+                            "pair",
+                            {mac: device.mac},
+                            data => {
+                                console.log(data);
+
+                                bluetoothctl.exec(
+                                    "devicesWithInfo",
+                                    {seconds: 5, only_paired: true},
+                                    data => console.log("paired-devices", data.devices),
+                                    err  => console.log(err)
+                                );    
+                            },
+                            err  => console.log(err)
+                        );
+                        
+                    }*/
                     
                 }
             },
             err  => console.log(err)
-        );*/
+        );
         
     },
     data => console.log( "NIE URUCHOMIONO", data )

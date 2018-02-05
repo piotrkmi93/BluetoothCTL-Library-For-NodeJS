@@ -20,7 +20,7 @@ function takeOver( data ) {
         
         let lines = data.split("\r\n");
         
-        if(lines.length) {
+        if(lines.length && !!~lines[0].indexOf("Device ")) {
             
             if(!self.resolveFuncRun){
                 
