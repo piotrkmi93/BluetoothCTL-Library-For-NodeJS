@@ -10,7 +10,85 @@ bluetoothctl.exec(
         
         console.log( 11, bluetoothctl.isRunning() );
         
+        /*bluetoothctl.exec(
+            "info",
+            //{mac: "00:80:25:34:D8:10"},
+            {mac: "E0:AA:96:49:53:6D"},
+            data => console.log("SUKCES", data),
+            err => console.log("BLAD", err)
+        );*/
+        
+        
         bluetoothctl.exec(
+            "scanon",
+            {},
+            data => {
+                
+                setTimeout(
+                    () => {
+                      
+                        bluetoothctl.exec(
+                            "devices",
+                            {},
+                            data => {
+                                
+                                if(data.devices.length){
+                                    
+                                    bluetoothctl.exec(
+                                        "info",
+                                        {mac: data.devices[0].mac},
+                                        data => console.log("SUKCES", data),
+                                        err => console.log("BLAD", err)
+                                    );
+                                    
+                                }
+                                
+                            },
+                            err => console.log("BLAD", err)
+                        )
+                        
+                    },
+                    5000
+                )
+                
+            },
+            err => console.log("BLAD", err)
+        )
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+/*        bluetoothctl.exec(
 //            "devices",
             "devicesWithInfo",
             {seconds: 5},
@@ -42,10 +120,10 @@ bluetoothctl.exec(
                 }
             },
             err  => console.log(err)
-        );
+        );*/
         
     },
-    data => console.log( "NIE URUCHOMIONO", data ),
+    data => console.log( "NIE URUCHOMIONO", data )
 );
 
 
