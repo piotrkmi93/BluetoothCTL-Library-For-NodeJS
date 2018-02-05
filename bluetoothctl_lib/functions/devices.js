@@ -27,11 +27,15 @@ function takeOver( data ) {
             if(!self.resolveFuncRun){
             
                 for(let line of lines){   
+                    
                     let idx = line.indexOf("Device ");
-                    if( idx > -1 ){
+                    if( idx !== -1 ){
                         let mac = line.slice( 7, 24 );
                         let name = line.slice( 25 );
-                        self.devices.push({
+                        
+                        let device = self.devices.find(dev => dev.mac === mac);
+                        
+                        if(!device) self.devices.push({
                             mac: mac,
                             name: name
                         });

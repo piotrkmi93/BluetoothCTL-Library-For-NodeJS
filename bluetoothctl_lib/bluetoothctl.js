@@ -144,7 +144,7 @@ function devicesWithInfo( attrs, resolve, reject, index = 0, array = [], first =
                         {mac: array[index].mac},
                         data => {
                             array[index] = data.device;
-                            devicesWithInfo(attrs, resolve, reject, index+1, array, false);
+                            setTimeout(() => devicesWithInfo(attrs, resolve, reject, index+1, array, false), 100);
                         },
                         err => reject(err)
                     );
