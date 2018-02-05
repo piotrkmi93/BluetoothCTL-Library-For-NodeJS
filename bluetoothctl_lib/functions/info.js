@@ -11,7 +11,8 @@ let self = {
     attempt         : 0,
     maxAttempt      : 100,
     
-    devices         : []
+    devices         : [],
+    timeout         : undefined
 };
 
 function takeOver( data ) {
@@ -20,9 +21,9 @@ function takeOver( data ) {
         
         let lines = data.split("\r\n");
         
-        if(lines.length && !!~lines[0].indexOf("Device ")) {
+        if(lines.length) {
             
-            if(!self.resolveFuncRun){
+            if(!lines[0].indexOf("Device ") && !self.resolveFuncRun){
                 
                 let device = {};
             
@@ -40,6 +41,7 @@ function takeOver( data ) {
                     
                 }
                 
+                clearTimeout( self.timeout );
                 self.resolveFuncRun = true;
                 self.alreadyRun = false;
                 self.resolveFunc({ success: true, device: device });
@@ -48,6 +50,7 @@ function takeOver( data ) {
             
         } else {
             
+            clearTimeout( self.timeout );
             self.rejectFuncRun = true;
             self.alreadyRun = false;
             self.rejectFunc( { success: false, reason: "No data returned" } );
@@ -86,6 +89,11 @@ module.exports = ( term ) => {
                 term.on("data", data => takeOver( data ));
 
                 term.write("info " + attrs.mac + "\r");
+                
+                self.timeout = setTimeout(
+                    () => reject({ success: false, reason: "Time limit has been reached" }),
+                    30000
+                );
 
             } else {
 

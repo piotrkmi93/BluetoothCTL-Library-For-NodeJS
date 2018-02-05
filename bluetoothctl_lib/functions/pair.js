@@ -9,7 +9,9 @@ let self = {
     attrs           : undefined,
 
     attempt         : 0,
-    maxAttempt      : 100
+    maxAttempt      : 100,
+    
+    timeout         : undefined
 };
 
 function takeOver( data ) {
@@ -18,22 +20,32 @@ function takeOver( data ) {
         
         if( ++self.attempt < self.maxAttempt ){
             
-            let exists = !!~data.indexOf( "Pairing succesful" );     
+            let exists = !!~data.indexOf( "Pairing successful" );     
             let fail = !!~data.indexOf( "Device " + self.attrs.mac + " not available" );
+            let fail2 = !!~data.indexOf( "Failed to pair" );
             
             if( exists && !self.resolveFuncRun ) {
-                self.resolveFunc( { success: true } );
+                clearTimeout( self.timeout );
                 self.resolveFuncRun = true;
                 self.alreadyRun = false;
+                self.resolveFunc( { success: true } );
             }
             else if( fail && !self.rejectFuncRun ) {
-                self.rejectFunc( { success: false, reason: "Device " + self.attrs.mac + " not available" } );
+                clearTimeout( self.timeout );
                 self.rejectFuncRun = true;
                 self.alreadyRun = false;
+                self.rejectFunc( { success: false, reason: "Device " + self.attrs.mac + " not available" } );
+            }
+            else if( fail2 && !self.rejectFuncRun ) {
+                clearTimeout( self.timeout );
+                self.rejectFuncRun = true;
+                self.alreadyRun = false;
+                self.rejectFunc( { success: false, reason: "Failed to pair with " + self.attrs.mac } );
             }
 
         } else {
 
+            clearTimeout( self.timeout );
             self.rejectFunc( { success: false, reason: "Max attempt has been achieved" } );
             self.rejectFuncRun = true;
             self.alreadyRun = false;
@@ -72,6 +84,11 @@ module.exports = ( term ) => {
                 term.on("data", data => takeOver( data ));
 
                 term.write("pair " + attrs.mac + "\r");
+                
+                self.timeout = setTimeout(
+                    () => reject({ success: false, reason: "Time limit has been reached" }),
+                    30000
+                );
 
             } else {
 

@@ -9,7 +9,9 @@ let self = {
     attrs           : undefined,
 
     attempt         : 0,
-    maxAttempt      : 100
+    maxAttempt      : 100,
+    
+    timeout         : undefined
 };
 
 function takeOver( data ) {
@@ -19,16 +21,19 @@ function takeOver( data ) {
         if( ++self.attempt < self.maxAttempt ){
             let exists = !!~data.indexOf( "Discovery started" );     
             if( exists && !self.resolveFuncRun ) {
-                self.resolveFunc( { success: true } );
+                clearTimeout( self.timeout );
                 self.resolveFuncRun = true;
                 self.alreadyRun = false;
+                self.resolveFunc( { success: true } );
             }
 
         } else {
 
-            self.rejectFunc( { success: false, reason: "Max attempt has been achieved" } );
+            clearTimeout( self.timeout );
             self.rejectFuncRun = true;
             self.alreadyRun = false;
+            self.rejectFunc( { success: false, reason: "Max attempt has been achieved" } );
+            
 
         }
 
@@ -63,6 +68,11 @@ module.exports = ( term ) => {
 
                 term.write("scan on\r");
 
+                self.timeout = setTimeout(
+                    () => reject({ success: false, reason: "Time limit has been reached" }),
+                    30000
+                );
+                
             } else {
 
                 console.error( {

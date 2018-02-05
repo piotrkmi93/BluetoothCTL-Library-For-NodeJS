@@ -11,7 +11,8 @@ let self = {
     attempt         : 0,
     maxAttempt      : 100,
     
-    devices         : []
+    devices         : [],
+    timeout         : undefined
 };
 
 function takeOver( data ) {
@@ -42,17 +43,19 @@ function takeOver( data ) {
                     }
                 }
 
-                self.resolveFunc({ success: true, devices: self.devices });
+                clearTimeout( self.timeout );
                 self.resolveFuncRun = true;
                 self.alreadyRun = false;
+                self.resolveFunc({ success: true, devices: self.devices });
                 
             }
             
         } else {
             
-            self.rejectFunc( { success: false, reason: "No data returned" } );
+            clearTimeout( self.timeout );
             self.rejectFuncRun = true;
             self.alreadyRun = false;
+            self.rejectFunc( { success: false, reason: "No data returned" } );
             
         }
 
@@ -86,6 +89,11 @@ module.exports = ( term ) => {
                 term.on("data", data => takeOver( data ));
 
                 term.write("paired-devices\r");
+                
+                self.timeout = setTimeout(
+                    () => reject({ success: false, reason: "Time limit has been reached" }),
+                    30000
+                );
 
             } else {
 
