@@ -29,9 +29,9 @@ function takeOver( data ) {
                 for(let line of lines){   
                     
                     let idx = line.indexOf("Device ");
-                    if( idx !== -1 ){
-                        let mac = line.slice( 7, 24 );
-                        let name = line.slice( 25 );
+                    if( idx === 0 ){
+                        let mac = line.slice( line.indexOf("Device ") + 7, 24 );
+                        let name = line.slice( line.indexOf("Device ") + 25 );
                         
                         let device = self.devices.find(dev => dev.mac === mac);
                         
