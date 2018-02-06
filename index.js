@@ -116,7 +116,7 @@ bluetoothctl.exec(
         // TEST 3
         bluetoothctl.exec(
             "devicesWithInfo",
-            {seconds: 5},
+            {seconds: 60},
             data => {
                 console.log("devices", data.devices);
                 

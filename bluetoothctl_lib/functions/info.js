@@ -23,7 +23,7 @@ function takeOver( data ) {
         
         if(lines.length) {
             
-            if(!lines[0].indexOf("Device ") && !self.resolveFuncRun){
+            if(lines.length > 2 && (!!~lines[0].indexOf("Device ") || !!~lines[1].indexOf("Device ")) && !self.resolveFuncRun){
                 
                 let device = {};
             
@@ -42,18 +42,18 @@ function takeOver( data ) {
                 }
                 
                 clearTimeout( self.timeout );
+                self.resolveFunc({ success: true, device: device });
                 self.resolveFuncRun = true;
                 self.alreadyRun = false;
-                self.resolveFunc({ success: true, device: device });
                 
             }
             
         } else {
             
             clearTimeout( self.timeout );
+            self.rejectFunc( { success: false, reason: "No data returned" } );
             self.rejectFuncRun = true;
             self.alreadyRun = false;
-            self.rejectFunc( { success: false, reason: "No data returned" } );
             
         }
         

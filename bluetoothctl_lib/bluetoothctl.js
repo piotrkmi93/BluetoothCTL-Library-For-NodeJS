@@ -123,8 +123,10 @@ function devices(attrs, resolve, reject){
 
 function devicesWithInfo( attrs, resolve, reject, index = 0, array = [], first = true ) {
     
+    // console.log("scanning", scanning);
     if(scanning){
         
+        // console.log("first", first);
         if( first ){
         
             let fun;
@@ -134,6 +136,7 @@ function devicesWithInfo( attrs, resolve, reject, index = 0, array = [], first =
             fun(
                 {},
                 data => {
+                    // console.log("devices without info", data.devices);
                     array = data.devices
                     if(!array.length) resolve({ devices: [] })
                     else devicesWithInfo(attrs,resolve,reject,0,array,false);
@@ -150,6 +153,7 @@ function devicesWithInfo( attrs, resolve, reject, index = 0, array = [], first =
                     commands.info(
                         {mac: array[index].mac},
                         data => {
+                            // console.log("device with info", data.device);
                             array[index] = data.device;
                             setTimeout(() => devicesWithInfo(attrs, resolve, reject, index+1, array, false), 100);
                         },
@@ -174,8 +178,12 @@ function devicesWithInfo( attrs, resolve, reject, index = 0, array = [], first =
     } else scanon(
         {}, 
         data => {
+            console.log("Waiting " + attrs.seconds + " seconds");
             setTimeout(
-                () => devicesWithInfo(attrs, resolve, reject, index, array, first),
+                () => {
+                    console.log(attrs.seconds + " seconds pass");
+                    devicesWithInfo(attrs, resolve, reject, index, array, first)
+                },
                 (attrs.seconds || 5) * 1000
             );
             
