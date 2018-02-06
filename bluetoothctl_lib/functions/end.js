@@ -20,7 +20,7 @@ function takeOver( data ) {
 
         if( ++self.attempt < self.maxAttempt ){
             let exists = !~data.indexOf( "[bluetooth]" );     
-            if( exists && !self.resolveFuncRun ) {
+            if( exists && !self.resolveFuncRun && !self.rejectFuncRun ) {
                 clearTimeout( self.timeout );
                 self.resolveFuncRun = true;
                 self.alreadyRun = false;
@@ -29,11 +29,14 @@ function takeOver( data ) {
 
         } else {
 
-            clearTimeout( self.timeout );
-            self.rejectFuncRun = true;
-            self.alreadyRun = false;
-            self.rejectFunc( { success: false, reason: "Max attempt has been achieved" } );
-
+			if(!self.resolveFuncRun && !self.rejectFuncRun){
+				
+				clearTimeout( self.timeout );
+				self.rejectFuncRun = true;
+				self.alreadyRun = false;
+				self.rejectFunc( { success: false, reason: "Max attempt has been achieved" } );
+				
+			}
         }
 
     }
@@ -63,12 +66,19 @@ module.exports = ( term ) => {
                 self.attrs = attrs;
                 self.attempt = 0;
 
-                term.on("data", data => takeOver( data ));
+                term.on("data", data => {
+					if(!self.resolveFuncRun && !self.rejectFuncRun) {
+						takeOver( data );
+					}
+				});
 
                 term.write("exit\r");
                 
                 self.timeout = setTimeout(
-                    () => reject({ success: false, reason: "Time limit has been reached" }),
+                    () => {
+						self.rejectFuncRun = true;
+						reject({ success: false, reason: "END: Time limit has been reached" });
+					},
                     30000
                 );
 

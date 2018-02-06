@@ -23,7 +23,7 @@ function takeOver( data ) {
         
         if(lines.length) {
             
-            if(lines.length > 2 && (!!~lines[0].indexOf("Device ") || !!~lines[1].indexOf("Device ")) && !self.resolveFuncRun){
+            if(lines.length > 2 && (!!~lines[0].indexOf("Device ") || !!~lines[1].indexOf("Device ")) && !self.resolveFuncRun && !self.rejectFuncRun){
                 
                 let device = {};
             
@@ -50,11 +50,12 @@ function takeOver( data ) {
             
         } else {
             
-            clearTimeout( self.timeout );
-            self.rejectFunc( { success: false, reason: "No data returned" } );
-            self.rejectFuncRun = true;
-            self.alreadyRun = false;
-            
+			if(!self.resolveFuncRun && !self.rejectFuncRun){
+				clearTimeout( self.timeout );
+				self.rejectFunc( { success: false, reason: "No data returned" } );
+				self.rejectFuncRun = true;
+				self.alreadyRun = false;
+			}
         }
         
     }
@@ -86,12 +87,19 @@ module.exports = ( term ) => {
                 self.attrs = attrs;
                 self.attempt = 0;
 
-                term.on("data", data => takeOver( data ));
+                term.on("data", data => {
+					if(!self.resolveFuncRun && !self.rejectFuncRun) {
+						takeOver( data );
+					}
+				});
 
                 term.write("info " + attrs.mac + "\r");
                 
                 self.timeout = setTimeout(
-                    () => reject({ success: false, reason: "Time limit has been reached" }),
+                    () => {
+						self.rejectFuncRun = true;
+						reject({ success: false, reason: "INFO: Time limit has been reached" });
+					},
                     30000
                 );
 

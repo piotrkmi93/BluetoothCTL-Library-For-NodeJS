@@ -23,13 +23,13 @@ function takeOver( data ) {
             let exists = !!~data.indexOf( "Device has been removed" );     
             let fail = !!~data.indexOf( "Device " + self.attrs.mac + " not available" );
             
-            if( exists && !self.resolveFuncRun ) {
+            if( exists && !self.resolveFuncRun && !self.rejectFuncRun ) {
                 clearTimeout( self.timeout );
                 self.resolveFuncRun = true;
                 self.alreadyRun = false;
                 self.resolveFunc( { success: true } );
             }
-            else if( fail && !self.rejectFuncRun ) {
+            else if( fail && !self.rejectFuncRun && !self.resolveFuncRun ) {
                 clearTimeout( self.timeout );
                 self.rejectFuncRun = true;
                 self.alreadyRun = false;
@@ -38,11 +38,12 @@ function takeOver( data ) {
 
         } else {
 
-            clearTimeout( self.timeout );
-            self.rejectFuncRun = true;
-            self.alreadyRun = false;
-            self.rejectFunc( { success: false, reason: "Max attempt has been achieved" } );
-
+			if(!self.resolveFuncRun && !self.rejectFuncRun) {
+				clearTimeout( self.timeout );
+				self.rejectFuncRun = true;
+				self.alreadyRun = false;
+				self.rejectFunc( { success: false, reason: "Max attempt has been achieved" } );
+			}
         }
 
     }
@@ -74,12 +75,19 @@ module.exports = ( term ) => {
                 self.attrs = attrs;
                 self.attempt = 0;
 
-                term.on("data", data => takeOver( data ));
-
-                term.write("remove " + attrs.mac + "\r");
+                term.on("data", data => {
+					if(!self.resolveFuncRun && !self.rejectFuncRun) {
+						takeOver( data );
+					}
+				});
+                
+                term.write("remove " + attrs.mac + "\r")
                 
                 self.timeout = setTimeout(
-                    () => reject({ success: false, reason: "Time limit has been reached" }),
+                    () => {
+						self.rejectFuncRun = true;
+						reject({ success: false, reason: "REMOVE: Time limit has been reached" });
+					},
                     30000
                 );
 

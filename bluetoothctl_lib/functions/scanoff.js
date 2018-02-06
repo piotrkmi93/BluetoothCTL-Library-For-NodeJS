@@ -17,10 +17,15 @@ let self = {
 function takeOver( data ) {
     
     if( typeof data === "string" ){
+        
+        // console.log(data);
 
         if( ++self.attempt < self.maxAttempt ){
             let exists = !!~data.indexOf( "Discovery stopped" );     
-            if( exists && !self.resolveFuncRun ) {
+            
+            console.log("exists", exists);
+            
+            if( exists && !self.resolveFuncRun && !self.rejectFuncRun ) {
                 
                 clearTimeout( self.timeout );
                 self.resolveFuncRun = true;
@@ -31,11 +36,12 @@ function takeOver( data ) {
 
         } else {
 
-            clearTimeout( self.timeout );
-            self.rejectFuncRun = true;
-            self.alreadyRun = false;
-            self.rejectFunc( { success: false, reason: "Max attempt has been achieved" } );
-            
+			if(!self.resolveFuncRun && !self.rejectFuncRun) {
+				clearTimeout( self.timeout );
+				self.rejectFuncRun = true;
+				self.alreadyRun = false;
+				self.rejectFunc( { success: false, reason: "Max attempt has been achieved" } );
+            }
 
         }
 
@@ -66,12 +72,20 @@ module.exports = ( term ) => {
                 self.attrs = attrs;
                 self.attempt = 0;
 
-                term.on("data", data => takeOver( data ));
 
+                term.on("data", data => {
+					if(!self.resolveFuncRun && !self.rejectFuncRun) {
+						takeOver( data );
+					}
+				});
+                
                 term.write("scan off\r");
                 
                 self.timeout = setTimeout(
-                    () => reject({ success: false, reason: "Time limit has been reached" }),
+                    () => {
+						self.rejectFuncRun = true;
+						reject({ success: false, reason: "SCANOFF: Time limit has been reached" });
+					},
                     30000
                 );
 

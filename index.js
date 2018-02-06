@@ -116,18 +116,18 @@ bluetoothctl.exec(
         // TEST 3
         bluetoothctl.exec(
             "devicesWithInfo",
-            {seconds: 10},
+            {seconds: 15},
             data => {
-                console.log("devices", data.devices);
+                console.log("devices", data.devices.length);
                 
-                bluetoothctl.exec(
-                    "devicesWithInfo",
-                    {seconds: 10},
-                    data => {
-                        console.log("devices2", data.devices);
-                    },
-                    err  => console.log(err)
-                );
+//                bluetoothctl.exec(
+//                    "devicesWithInfo",
+//                    {seconds: 10},
+//                    data => {
+//                        console.log("devices2", data.devices);
+//                    },
+//                    err  => console.log(err)
+//                );
                 
                 //for(let device of data.devices){
                     

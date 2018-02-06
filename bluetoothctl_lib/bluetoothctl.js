@@ -113,12 +113,14 @@ function scanoff(attrs, resolve, reject){
     }
 }
 
+let t = 0;
+
 function devicesWithInfo( attrs, resolve, reject, index = 0, array = [], first = true ) {
     
-    // console.log("scanning", scanning);
+    //console.log("scanning", scanning);
     if(scanning){
         
-        // console.log("first", first);
+        //console.log("first", first);
         if( first ){
         
             if( attrs.hasOwnProperty("only_paired") && attrs.only_paired ) {
@@ -136,6 +138,7 @@ function devicesWithInfo( attrs, resolve, reject, index = 0, array = [], first =
                 commands.devices(
                     {},
                     data => {
+                        console.log("devices without info", data.devices.length, (new Date()).getTime() - t);
                         array = data.devices;
                         if(!array.length) resolve({ "devices": [] })
                         else devicesWithInfo(attrs,resolve,reject,0,array,false);
@@ -153,7 +156,7 @@ function devicesWithInfo( attrs, resolve, reject, index = 0, array = [], first =
                     commands.info(
                         {mac: array[index].mac},
                         data => {
-                            // console.log("device with info", data.device);
+                            //console.log("device with info", !!data.device);
                             array[index] = data.device;
                             setTimeout(() => devicesWithInfo(attrs, resolve, reject, index+1, array, false), 100);
                         },
@@ -163,6 +166,8 @@ function devicesWithInfo( attrs, resolve, reject, index = 0, array = [], first =
                 } else reject({ success: false, reason: "No mac given" });
 
             } else {
+                
+                console.log("SCANOFF STARTED", (new Date()).getTime() - t);
                 scanoff(
                     {},
                     () => resolve({ success: true, devices: array }),
@@ -175,20 +180,23 @@ function devicesWithInfo( attrs, resolve, reject, index = 0, array = [], first =
             }
         }
         
-    } else scanon(
-        {}, 
-        data => {
-            console.log("Waiting " + attrs.seconds + " seconds");
-            setTimeout(
-                () => {
-                    console.log(attrs.seconds + " seconds pass");
-                    devicesWithInfo(attrs, resolve, reject, index, array, first)
-                },
-                (attrs.seconds || 5) * 1000
-            );
-            
-        },
-        err => reject(err)
-    );
-  
+    } else {
+        
+        t = (new Date()).getTime();
+        scanon(
+            {}, 
+            data => {
+                console.log("Waiting " + attrs.seconds + " seconds", (new Date()).getTime() - t);
+                setTimeout(
+                    () => {
+                        console.log(attrs.seconds + " seconds pass", (new Date()).getTime() - t);
+                        devicesWithInfo(attrs, resolve, reject, index, array, first)
+                    },
+                    (attrs.seconds || 5) * 1000
+                );
+
+            },
+            err => reject(err)
+        );
+           }
 }

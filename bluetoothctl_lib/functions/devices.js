@@ -25,7 +25,7 @@ function takeOver( data ) {
         
         if(lines.length) {
             
-            if(!self.resolveFuncRun){
+            if(!self.resolveFuncRun && !self.rejectFuncRun){
             
                 for(let line of lines){   
                     
@@ -52,10 +52,12 @@ function takeOver( data ) {
             
         } else {
             
-            clearTimeout( self.timeout );
-            self.rejectFuncRun = true;
-            self.alreadyRun = false;
-            self.rejectFunc( { success: false, reason: "No data returned" } );
+			if(!self.resolveFuncRun && !self.rejectFuncRun){
+				clearTimeout( self.timeout );
+				self.rejectFuncRun = true;
+				self.alreadyRun = false;
+				self.rejectFunc( { success: false, reason: "No data returned" } );
+			}
             
         }
 
@@ -86,12 +88,19 @@ module.exports = ( term ) => {
                 self.attrs = attrs;
                 self.attempt = 0;
 
-                term.on("data", data => takeOver( data ));
+                term.on("data", data => {
+					if(!self.resolveFuncRun && !self.rejectFuncRun) {
+						takeOver( data );
+					}
+				});
 
                 term.write("devices\r");
                 
                 self.timeout = setTimeout(
-                    () => reject({ success: false, reason: "Time limit has been reached" }),
+                    () => {
+						self.rejectFuncRun = true;
+						reject({ success: false, reason: "DEVICES: Time limit has been reached" });
+					},
                     30000
                 );
 
