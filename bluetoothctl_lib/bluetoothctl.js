@@ -48,7 +48,6 @@ function exec(command, attrs, resolve, reject){
             if      (command === "end")         end(attrs, resolve, reject);
             else if (command === "scanon")      scanon(attrs, resolve, reject);
             else if (command === "scanoff")     scanoff(attrs, resolve, reject);
-            else if (command === "devices")     devices(attrs, resolve, reject);
             else commands [ command ] ( attrs, resolve, reject );
 
         } else {
@@ -114,13 +113,6 @@ function scanoff(attrs, resolve, reject){
     }
 }
 
-function devices(attrs, resolve, reject){
-    commands [ "devices" ] ( attrs, data => {
-        devices = data.devices;
-        resolve(data);
-    }, reject );
-}
-
 function devicesWithInfo( attrs, resolve, reject, index = 0, array = [], first = true ) {
     
     // console.log("scanning", scanning);
@@ -133,19 +125,19 @@ function devicesWithInfo( attrs, resolve, reject, index = 0, array = [], first =
                 commands.paireddevices(
                     {},
                     data => {
-                        array = data.devices
-                        if(!array.length) resolve({ devices: [] })
+                        array = data.devices;
+                        if(!array.length) resolve({ "devices": [] })
                         else devicesWithInfo(attrs,resolve,reject,0,array,false);
                     },
                     err => reject(err)
                 );
             }
             else {
-                devices(
+                commands.devices(
                     {},
                     data => {
-                        array = data.devices
-                        if(!array.length) resolve({ devices: [] })
+                        array = data.devices;
+                        if(!array.length) resolve({ "devices": [] })
                         else devicesWithInfo(attrs,resolve,reject,0,array,false);
                     },
                     err => reject(err)

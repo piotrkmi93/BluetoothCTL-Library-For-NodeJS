@@ -116,11 +116,20 @@ bluetoothctl.exec(
         // TEST 3
         bluetoothctl.exec(
             "devicesWithInfo",
-            {seconds: 60},
+            {seconds: 10},
             data => {
                 console.log("devices", data.devices);
                 
-                for(let device of data.devices){
+                bluetoothctl.exec(
+                    "devicesWithInfo",
+                    {seconds: 10},
+                    data => {
+                        console.log("devices2", data.devices);
+                    },
+                    err  => console.log(err)
+                );
+                
+                //for(let device of data.devices){
                     
                     // TEST 4
                     /*if("00:80:25:34:D8:10" == device.mac){
@@ -143,7 +152,7 @@ bluetoothctl.exec(
                         
                     }*/
                     
-                }
+                //}
             },
             err  => console.log(err)
         );
