@@ -129,20 +129,28 @@ function devicesWithInfo( attrs, resolve, reject, index = 0, array = [], first =
         // console.log("first", first);
         if( first ){
         
-            let fun;
-            if( !attrs.only_paired ) fun = devices;
-            else fun = commands.paireddevices;
-            
-            fun(
-                {},
-                data => {
-                    // console.log("devices without info", data.devices);
-                    array = data.devices
-                    if(!array.length) resolve({ devices: [] })
-                    else devicesWithInfo(attrs,resolve,reject,0,array,false);
-                },
-                err => reject(err)
-            )
+            if( attrs.hasOwnProperty("only_paired") && attrs.only_paired ) {
+                commands.paireddevices(
+                    {},
+                    data => {
+                        array = data.devices
+                        if(!array.length) resolve({ devices: [] })
+                        else devicesWithInfo(attrs,resolve,reject,0,array,false);
+                    },
+                    err => reject(err)
+                );
+            }
+            else {
+                devices(
+                    {},
+                    data => {
+                        array = data.devices
+                        if(!array.length) resolve({ devices: [] })
+                        else devicesWithInfo(attrs,resolve,reject,0,array,false);
+                    },
+                    err => reject(err)
+                );
+            }
 
         } else {
             
