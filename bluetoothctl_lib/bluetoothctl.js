@@ -173,7 +173,7 @@ function devicesWithInfo( attrs, resolve, reject, index = 0, array = [], first =
                     () => resolve({ success: true, devices: array }),
                     er => {
                         console.log(er);
-                        resolve({ success: true, devices: array });
+                        reject({ success: false, devices: array });
                     }
                 )
                 
