@@ -237,9 +237,16 @@ function devicesWithInfo(attrs, resolve, reject, index = 0, array = [], first = 
                 commands.paireddevices({},
                     data => {
                         array = data.devices;
-                        if (!array.length) resolve({
-                            "devices": []
-                        })
+                        if ( !array.length ) 
+                            scanoff(
+                                {},
+                                () => resolve({
+                                    success: true,
+                                    devices: array,
+                                    msg: "No devices has been found"
+                                }),
+                                err => reject(err)                                
+                            );
                         else devicesWithInfo(attrs, resolve, reject, 0, array, false);
                     },
                     err => reject(err)
@@ -248,9 +255,16 @@ function devicesWithInfo(attrs, resolve, reject, index = 0, array = [], first = 
                 commands.devices({},
                     data => {
                         array = data.devices;
-                        if (!array.length) resolve({
-                            "devices": []
-                        })
+                        if ( !array.length ) 
+                            scanoff(
+                                {},
+                                () => resolve({
+                                    success: true,
+                                    devices: array,
+                                    msg: "No devices has been found"
+                                }),
+                                err => reject(err)                                
+                            );
                         else devicesWithInfo(attrs, resolve, reject, 0, array, false);
                     },
                     err => reject(err)
@@ -285,13 +299,7 @@ function devicesWithInfo(attrs, resolve, reject, index = 0, array = [], first = 
                         success: true,
                         devices: array
                     }),
-                    er => {
-                        console.log(er);
-                        reject({
-                            success: false,
-                            devices: array
-                        });
-                    }
+                    err => reject(err)
                 );
 
             }

@@ -1,42 +1,22 @@
 let bluetoothctl = require("./bluetoothctl_lib/bluetoothctl");
 
-console.log(3, bluetoothctl.isRunning());
+let counter = 0;
 
 bluetoothctl.exec(
-    "begin", {},
+    "begin", 
+    undefined,
     data => {
-        console.log("URUCHOMIONO", data);
-        console.log(10, bluetoothctl.isRunning());
+        console.log( "BEGIN SUCCESS", data );
 
-        resolve()
-
-        //        bluetoothctl.exec(
-        //            "scanon",
-        //            {},
-        //            data => {
-        //                console.log( "SKANUJE", data);
-        //                
-        //                
-        //                bluetoothctl.exec(
-        //                    "devices",
-        //                    {},
-        //                    data => {
-        //                        console.log( "DEVICES", data );
-        //                    },
-        //                    err  => console.log( "DEVICES FALSE", err)
-        //                )
-        //                
-        //            },
-        //            err  => console.log( "NIE SKANUJE", err)
-        //        );
+        resolve();
 
     },
-    err => console.log("NIE URUCHOMIONO", err)
+    err => console.log( "BEGIN FAILED", err )
 );
 
 
 function resolve(data) {
-    data && console.log("DATA", data);
+    data && console.log(++counter, "DATA", data);
 
     bluetoothctl.exec(
         "devicesWithInfo", {
